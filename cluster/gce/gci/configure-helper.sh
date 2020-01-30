@@ -118,6 +118,9 @@ function config-ip-firewall {
     echo "Add rule for metadata concealment"
     iptables -w -t nat -I PREROUTING -p tcp -d 169.254.169.254 --dport 80 -m comment --comment "metadata-concealment: bridge traffic to metadata server goes to metadata proxy" -j DNAT --to-destination 127.0.0.1:988
   fi
+
+  # Log/disallow all metadata access not from whitelisted processes.
+  iptables -I OUTPUT -p tcp --dport 80 -d 169.254.169.254 -m owner ! --uid-owner=5001 -j LOG
 }
 
 function create-dirs {
